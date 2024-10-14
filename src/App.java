@@ -1,5 +1,3 @@
-//import java.util.List;
-//import java.util.Date;
 import java.util.Scanner;
 
 public class App {
@@ -7,8 +5,11 @@ public class App {
 
         Scanner s = new Scanner(System.in);
         int opcao = -1;
+        
 
         while (opcao != 0){
+
+            String[] participantes = {};
         
             System.out.println("\nMenu");
             System.out.println("1 - Cadastrar Evento");
@@ -19,11 +20,25 @@ public class App {
             System.out.print("Digite o número da opção desejada: ");
             opcao = s.nextInt();
 
+            //System.out.print(opcao);
+            if (opcao == 1){
+                participantes[0] = "opcao 1";
+                System.out.print(participantes[0]);
+            }
+            if (opcao == 2){
+                System.out.print(opcao);
+            }
+            if (opcao == 3){
+                System.out.print(opcao);
+            }
+            if (opcao == 4){
+                System.out.print(opcao);
+            }
+
             System.out.println();
-            
             }
         s.close();
-        System.out.println("\nFinalizado\n");
+        System.out.println("\n~Finalizado~\n");
         }
         
         
