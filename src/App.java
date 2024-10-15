@@ -113,10 +113,16 @@ public class App {
 
                         while (int_instrutor != 2) {
                             contador_ins++;
-                            String instrutorString;
-                            System.out.format("Instrutor(%d):", contador_ins);
-                            instrutorString = s.nextLine();
-                            instrutores.add(instrutorString);
+                            //String instrutorString;
+                            System.out.format("(%d)Cadastro de Instrutor:", contador_ins);
+                            List<Participante> participantes_instrutor = new ArrayList<>();
+
+                            Participante dadosParticipante = Participante.capturarDadosParticipante(scan);
+                            //s.nextLine();
+                            participantes_instrutor.add(new Participante(dadosParticipante.getNome(), dadosParticipante.getEmail(), dadosParticipante.getTipo()));
+
+                            //instrutorString = s.nextLine();
+                            //instrutores.add(instrutorString);
 
                             System.out.print("Cadastrar mais instrutor? (1)Sim, (2)Não\n");
                             int_instrutor = sc.nextInt();
