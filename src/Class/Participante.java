@@ -40,11 +40,12 @@ public class Participante {
     public static Participante capturarDadosParticipante(Scanner s) {
         System.out.println("\nNome do Participante:");
         String nome = s.nextLine();
+        s.nextLine();
 
         System.out.println("\nE-mail:");
         String email = s.nextLine();
 
-        System.out.println("Tipo do Participante:");
+        System.out.println("\nTipo do Participante:");
         System.out.println("1 - Normal");
         System.out.println("2 - VIP");
         int tipoParticipante = s.nextInt();
