@@ -1,5 +1,7 @@
 package Class;
 
+import java.util.Scanner;
+
 public class Participante {
     private String nome;
     private String email;
@@ -33,5 +35,20 @@ public class Participante {
 
     public void setTipo(int tipo) {
         this.tipo = tipo;
+    }
+
+    public static Participante capturarDadosParticipante(Scanner s) {
+        System.out.println("\nNome do Participante:");
+        String nome = s.nextLine();
+
+        System.out.println("\nE-mail:");
+        String email = s.nextLine();
+
+        System.out.println("Tipo do Participante:");
+        System.out.println("1 - Normal");
+        System.out.println("2 - VIP");
+        int tipoParticipante = s.nextInt();
+
+        return new Participante(nome, email, tipoParticipante);
     }
 }
