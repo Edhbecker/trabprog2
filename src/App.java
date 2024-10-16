@@ -5,12 +5,14 @@ import java.util.Scanner;
 import Class.Evento;
 import Class.Palestra;
 import Class.Participante;
+import Class.Reserva;
 import Class.Workshop;
 
 public class App {
     static ArrayList<Palestra> palestras = new ArrayList<>();
     static ArrayList<Workshop> workshops = new ArrayList<>();
     static ArrayList<Participante> participantes = new ArrayList<>();
+    static ArrayList<Reserva> reservas = new ArrayList<>();
 
     public static void main(String[] args) throws Exception {
 
@@ -174,13 +176,27 @@ public class App {
 
             } else if (opcao == 2) {
                 //cadastrarParticipante(s, sc);
-                List<Participante> participante = new ArrayList<>();
-
                 Participante dadosParticipante = Participante.capturarDadosParticipante(scan);
-                participante.add(new Participante(dadosParticipante.getNome(), dadosParticipante.getEmail(), dadosParticipante.getTipo()));
-
+                participantes.add(new Participante(dadosParticipante.getNome(), dadosParticipante.getEmail(), dadosParticipante.getTipo()));
+                System.out.println("Participante cadastrado com sucesso!\n");
+            
             } else if (opcao == 3) {
-                // Implementar gerenciar reservas
+                    System.out.println("\n~Gerenciamento de Reservas~\n");
+                    System.out.println("1 - Adicionar Reserva");
+                    System.out.println("2 - Cancelar Reserva");
+                    System.out.println("3 - Listar Reservas");
+                    int opcaoReserva = sc.nextInt();
+                
+                    if (opcaoReserva == 1) {
+                        adicionarReserva(s);
+                    } else if (opcaoReserva == 2) {
+                        cancelarReserva(sc);
+                    } else if (opcaoReserva == 3) {
+                        listarReservas();
+                    } else {
+                        System.out.print("\nOpção inválida\n");
+                    }
+                
             } else if (opcao == 4) {
                 gerarRelatorios();
                 //int resposta = -1;  //Implementar
@@ -245,7 +261,86 @@ public class App {
     }
 
     private static int contarParticipantesPorEvento(Palestra palestra) {
-        //implementar lógica para contar quantos participantes estão inscritos na palestra
-        return 0; // Retorne o número real de participantes inscritos quando a lógica for implementada
+        int contador = 0;
+        for (Reserva reserva : reservas) {
+            if (reserva.getEvento().equals(palestra)) {
+                contador++;
+            }
+        }
+        return contador;
+    }    
+
+    private static void adicionarReserva(Scanner sc) {
+        // Listar os eventos disponíveis
+        System.out.println("Selecione um evento para reservar:");
+        for (int i = 0; i < palestras.size(); i++) {
+            Palestra palestra = palestras.get(i);
+            System.out.printf("%d - %s (Capacidade Máxima: %d)\n", i + 1, palestra.getNome(), palestra.getCapacidadeMax());
+        }
+    
+        int eventoEscolhido = sc.nextInt() - 1;
+        if (eventoEscolhido < 0 || eventoEscolhido >= palestras.size()) {
+            System.out.println("Evento inválido!");
+            return;
+        }
+    
+        Evento evento = palestras.get(eventoEscolhido);
+        if (contarParticipantesPorEvento((Palestra) evento) >= evento.getCapacidadeMax()) {
+            System.out.println("Não é possível adicionar reserva. Capacidade máxima atingida.");
+            return;
+        }
+    
+        // Listar participantes já cadastrados
+        if (participantes.isEmpty()) {
+            System.out.println("Não há participantes cadastrados.");
+            return;
+        }
+    
+        System.out.println("Selecione um participante cadastrado:");
+        for (int i = 0; i < participantes.size(); i++) {
+            Participante participante = participantes.get(i);
+            System.out.printf("%d - Nome: %s, Email: %s, Tipo: %s\n",
+                    i + 1, participante.getNome(), participante.getEmail(), participante.getTipo() == 1 ? "Normal" : "VIP");
+        }
+    
+        int participanteEscolhido = sc.nextInt() - 1;
+        if (participanteEscolhido < 0 || participanteEscolhido >= participantes.size()) {
+            System.out.println("Participante inválido!");
+            return;
+        }
+    
+        Participante participante = participantes.get(participanteEscolhido);
+        Reserva novaReserva = new Reserva(participante, evento);
+        reservas.add(novaReserva);
+        System.out.println("Reserva adicionada com sucesso!");
+    }
+    
+    
+
+private static void cancelarReserva(Scanner sc) {
+    System.out.println("Lista de Reservas:");
+    for (int i = 0; i < reservas.size(); i++) {
+        Reserva reserva = reservas.get(i);
+        System.out.printf("%d - Participante: %s, Evento: %s\n", i + 1, reserva.getParticipante().getNome(), reserva.getEvento().getNome());
+    }
+
+    System.out.print("Digite o número da reserva a ser cancelada: ");
+    int reservaEscolhida = sc.nextInt() - 1;
+    if (reservaEscolhida < 0 || reservaEscolhida >= reservas.size()) {
+        System.out.println("Reserva inválida!");
+        return;
+    }
+
+    reservas.remove(reservaEscolhida);
+    System.out.println("Reserva cancelada com sucesso!");
+}
+
+private static void listarReservas() {
+    System.out.println("\n~Reservas Atuais~");
+    for (Reserva reserva : reservas) {
+        System.out.printf("Participante: %s, Evento: %s\n", reserva.getParticipante().getNome(), reserva.getEvento().getNome());
     }
 }
+
+}
+
