@@ -115,10 +115,16 @@ public class App {
 
                         while (int_instrutor != 2) {
                             contador_ins++;
-                            String instrutorString;
-                            System.out.format("Instrutor(%d):", contador_ins);
-                            instrutorString = s.nextLine();
-                            instrutores.add(instrutorString);
+                            //String instrutorString;
+                            System.out.format("(%d)Cadastro de Instrutor:", contador_ins);
+                            List<Participante> participantes_instrutor = new ArrayList<>();
+
+                            Participante dadosParticipante = Participante.capturarDadosParticipante(scan);
+                            //s.nextLine();
+                            participantes_instrutor.add(new Participante(dadosParticipante.getNome(), dadosParticipante.getEmail(), dadosParticipante.getTipo()));
+
+                            //instrutorString = s.nextLine();
+                            //instrutores.add(instrutorString);
 
                             System.out.print("Cadastrar mais instrutor? (1)Sim, (2)Não\n");
                             int_instrutor = sc.nextInt();
@@ -198,11 +204,19 @@ public class App {
                     }
                 
             } else if (opcao == 4) {
-                gerarRelatorios();
-                //int resposta = -1;  //Implementar
-                //if (resposta == 1){} // Gerar relatórios com a lista de eventos cadastrados e a quantidade de participantes em cada um
-                //else if (resposta == 2) {} // - Implementar métodos para listar todos os participantes de um evento específico e também os participantes VIP.
+                // Sub-menu para escolha de tipo de relatório
+        System.out.println("\nEscolha o Relatório que deseja visualizar:");
+        System.out.println("1 - Relatório de Eventos");
+        System.out.println("2 - Relatório de Participantes por Evento");
+        int tipoRelatorio = sc.nextInt();
 
+        if (tipoRelatorio == 1) {
+            gerarRelatorioEventos();  // Chamando o método que gera o relatório de eventos
+        } else if (tipoRelatorio == 2) {
+            gerarRelatorioParticipantesPorEvento(sc);  // Chamando o método que gera o relatório de participantes por evento
+        } else {
+            System.out.println("Opção inválida!");
+        }
             } else if (opcao < 0 || opcao > 4) {
                 System.out.print("Opção inválida");
             }
@@ -244,19 +258,79 @@ public class App {
         System.out.println("\nParticipante cadastrado com sucesso!\n");
     }
 */
-    private static void gerarRelatorios() {
+    private static void gerarRelatorioEventos() {
         System.out.println("\n~Relatório de Eventos~");
+
+        // Relatório de Palestras
+        System.out.println("Palestras:");
         for (Palestra palestra : palestras) {
-            System.out.printf("Evento: %s, Data: %s, Local: %s, Capacidade Máxima: %d, Duração: %d minutos\n",
-                    palestra.getNome(), palestra.getData(), palestra.getLocal(), palestra.getCapacidadeMax(), palestra.getDuracao());
-            System.out.printf("Total de Participantes: %d\n", contarParticipantesPorEvento(palestra));
-            System.out.println();
+            System.out.printf("Evento: %s, Data: %s, Local: %s, Capacidade Máxima: %d\n",
+                    palestra.getNome(), palestra.getData(), palestra.getLocal(), palestra.getCapacidadeMax());
+            System.out.printf("Total de Participantes: %d\n\n", palestra.getParticipantes().size());
         }
 
-        System.out.println("~Participantes~");
+        // Relatório de Workshops (se necessário incluir participantes nos workshops)
+        System.out.println("Workshops:");
+        for (Workshop workshop : workshops) {
+            System.out.printf("Evento: %s, Data: %s, Local: %s, Capacidade Máxima: %d\n",
+                    workshop.getNome(), workshop.getData(), workshop.getLocal(), workshop.getCapacidadeMax());
+            System.out.println("Participantes: (implementação necessária para vincular participantes a workshops)\n");
+        }
+    }
+
+    private static void gerarRelatorioParticipantesPorEvento(Scanner sc) {
+        System.out.println("\nSelecione o tipo de evento:");
+        System.out.println("1 - Palestra");
+        System.out.println("2 - Workshop");
+        int tipoEvento = sc.nextInt();
+
+        if (tipoEvento == 1) { // Relatório de Palestra
+            System.out.println("\nSelecione a Palestra:");
+            for (int i = 0; i < palestras.size(); i++) {
+                System.out.printf("%d - %s\n", i + 1, palestras.get(i).getNome());
+            }
+            int index = sc.nextInt() - 1;
+
+            if (index >= 0 && index < palestras.size()) {
+                Palestra palestraSelecionada = palestras.get(index);
+                System.out.printf("\nPalestra Selecionada: %s\n", palestraSelecionada.getNome());
+                listarParticipantes(palestraSelecionada.getParticipantes());
+            } else {
+                System.out.println("Opção inválida!");
+            }
+        } else if (tipoEvento == 2) { // Relatório de Workshop
+            System.out.println("\nSelecione o Workshop:");
+            for (int i = 0; i < workshops.size(); i++) {
+                System.out.printf("%d - %s\n", i + 1, workshops.get(i).getNome());
+            }
+            int index = sc.nextInt() - 1;
+
+            if (index >= 0 && index < workshops.size()) {
+                Workshop workshopSelecionado = workshops.get(index);
+                System.out.printf("\nWorkshop Selecionado: %s\n", workshopSelecionado.getNome());
+                // Aqui podemos adicionar a lógica para listar participantes, quando implementado.
+                System.out.println("Participantes: (implementação necessária)\n");
+            } else {
+                System.out.println("Opção inválida!");
+            }
+        } else {
+            System.out.println("Tipo de evento inválido!");
+        }
+    }
+
+    // Método auxiliar para listar participantes, separando VIPs
+    private static void listarParticipantes(List<Participante> participantes) {
+        System.out.println("\n~Lista de Participantes~");
         for (Participante participante : participantes) {
-            System.out.printf("Nome: %s, Email: %s, Tipo: %s\n", 
-                participante.getNome(), participante.getEmail(), participante.getTipo() == 1 ? "Normal" : "VIP");
+            String tipo = participante.getTipo() == 1 ? "Normal" : "VIP";
+            System.out.printf("Nome: %s, Email: %s, Tipo: %s\n", participante.getNome(), participante.getEmail(), tipo);
+        }
+
+        System.out.println("\n~Lista de Participantes VIP~");
+        for (Participante participante : participantes) {
+            if (participante.getTipo() == 2) { // Tipo 2 é VIP
+                System.out.printf("Nome: %s, Email: %s\n", participante.getNome(), participante.getEmail());
+            }
         }
     }
 
