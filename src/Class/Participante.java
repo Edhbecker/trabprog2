@@ -40,7 +40,7 @@ public class Participante {
     public static Participante capturarDadosParticipante(Scanner s) {
         System.out.println("\nNome do Participante:");
         String nome = s.nextLine();
-        s.nextLine();
+        //s.nextLine();
 
         System.out.println("\nE-mail:");
         String email = s.nextLine();

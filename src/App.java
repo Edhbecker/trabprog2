@@ -18,7 +18,8 @@ public class App {
 
         Scanner s = new Scanner(System.in); // Captura de string
         Scanner sc = new Scanner(System.in); // Captura de inteiros
-        Scanner scan = new Scanner(System.in); // Captura de eventos
+        Scanner scan_eve = new Scanner(System.in); // Captura de eventos
+        Scanner scan_part = new Scanner(System.in); // Captura de participantes
         int opcao = -1;
 
         while (opcao != 0) {
@@ -44,11 +45,14 @@ public class App {
                     int resposta = 0;
 
                     while (cadastro) {
-                        Evento dadosEvento = Evento.capturarDadosEvento(scan);
+                        Evento dadosEvento = Evento.capturarDadosEvento(scan_eve);
+
                         List<String> temas = new ArrayList<>();
                         List<Participante> participantes_evento = new ArrayList<>();
 
-                        Participante dadosParticipante = Participante.capturarDadosParticipante(scan);
+                        System.out.print("~Cadastro de Palestrante~");
+                        Participante dadosParticipante = Participante.capturarDadosParticipante(scan_part);
+                        
                         participantes_evento.add(new Participante(dadosParticipante.getNome(), dadosParticipante.getEmail(), dadosParticipante.getTipo()));
 
                         int v_duracao;
@@ -84,7 +88,7 @@ public class App {
                         v_duracao, 
                         temas));
                         //palestras.add(new Palestra(v_Nome, v_Data, v_Local, v_capacidade_max, v_duracao, temas));
-
+                    
                         System.out.println("Cadastrar mais Palestras? (1)Sim, (2)Não");
                         resposta = sc.nextInt();
                         if (resposta == 1) {
@@ -102,7 +106,7 @@ public class App {
                     int resposta = 0;
 
                     while (cadastro) {
-                        Evento dadosEvento = Evento.capturarDadosEvento(scan);
+                        Evento dadosEvento = Evento.capturarDadosEvento(scan_eve);
                         List<String> instrutores = new ArrayList<>();
                         List<String> materiais = new ArrayList<>();
                         int v_cargaHoraria;
@@ -119,12 +123,10 @@ public class App {
                             System.out.format("(%d)Cadastro de Instrutor:", contador_ins);
                             List<Participante> participantes_instrutor = new ArrayList<>();
 
-                            Participante dadosParticipante = Participante.capturarDadosParticipante(scan);
-                            //s.nextLine();
-                            participantes_instrutor.add(new Participante(dadosParticipante.getNome(), dadosParticipante.getEmail(), dadosParticipante.getTipo()));
-
-                            //instrutorString = s.nextLine();
-                            //instrutores.add(instrutorString);
+                            Participante dadosParticipante = Participante.capturarDadosParticipante(scan_part);
+                            participantes_instrutor.add(new Participante(dadosParticipante.getNome(), 
+                            dadosParticipante.getEmail(), 
+                            dadosParticipante.getTipo()));
 
                             System.out.print("Cadastrar mais instrutor? (1)Sim, (2)Não\n");
                             int_instrutor = sc.nextInt();
@@ -181,9 +183,10 @@ public class App {
                 }
 
             } else if (opcao == 2) {
-                //cadastrarParticipante(s, sc);
-                Participante dadosParticipante = Participante.capturarDadosParticipante(scan);
-                participantes.add(new Participante(dadosParticipante.getNome(), dadosParticipante.getEmail(), dadosParticipante.getTipo()));
+                Participante dadosParticipante = Participante.capturarDadosParticipante(scan_part);
+                participantes.add(new Participante(dadosParticipante.getNome(), 
+                dadosParticipante.getEmail(), 
+                dadosParticipante.getTipo()));
                 System.out.println("Participante cadastrado com sucesso!\n");
             
             } else if (opcao == 3) {
@@ -205,18 +208,18 @@ public class App {
                 
             } else if (opcao == 4) {
                 // Sub-menu para escolha de tipo de relatório
-        System.out.println("\nEscolha o Relatório que deseja visualizar:");
-        System.out.println("1 - Relatório de Eventos");
-        System.out.println("2 - Relatório de Participantes por Evento");
-        int tipoRelatorio = sc.nextInt();
+                System.out.println("\nEscolha o Relatório que deseja visualizar:");
+                System.out.println("1 - Relatório de Eventos");
+                System.out.println("2 - Relatório de Participantes por Evento");
+                int tipoRelatorio = sc.nextInt();
 
-        if (tipoRelatorio == 1) {
-            gerarRelatorioEventos();  // Chamando o método que gera o relatório de eventos
-        } else if (tipoRelatorio == 2) {
-            gerarRelatorioParticipantesPorEvento(sc);  // Chamando o método que gera o relatório de participantes por evento
-        } else {
-            System.out.println("Opção inválida!");
-        }
+                if (tipoRelatorio == 1) {
+                    gerarRelatorioEventos();  // Chamando o método que gera o relatório de eventos
+                } else if (tipoRelatorio == 2) {
+                    gerarRelatorioParticipantesPorEvento(sc);  // Chamando o método que gera o relatório de participantes por evento
+                } else {
+                    System.out.println("Opção inválida!");
+                }
             } else if (opcao < 0 || opcao > 4) {
                 System.out.print("Opção inválida");
             }
@@ -225,39 +228,13 @@ public class App {
         }
         s.close();
         sc.close();
-        scan.close();
+        scan_eve.close();
+        scan_part.close();
         System.out.println("\n~Finalizado~\n");
     }
 
 
 
-    
-/*  Removido
-    private static void cadastrarParticipante(Scanner s, Scanner sc) {
-        System.out.println("\n~Inicializando cadastro de Participante~\n");
-
-        String nome;
-        String email;
-        int tipo;
-
-        System.out.println("Nome do Participante:");
-        s.nextLine(); // Limpar o buffer do scanner
-        nome = s.nextLine();
-
-        System.out.println("Email do Participante:");
-        email = s.nextLine();
-
-        System.out.println("Tipo do Participante:");
-        System.out.println("1 - Normal");
-        System.out.println("2 - VIP");
-        tipo = sc.nextInt();
-
-        Participante participante = new Participante(nome, email, tipo);
-        participantes.add(participante);
-
-        System.out.println("\nParticipante cadastrado com sucesso!\n");
-    }
-*/
     private static void gerarRelatorioEventos() {
         System.out.println("\n~Relatório de Eventos~");
 

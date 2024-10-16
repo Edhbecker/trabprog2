@@ -20,7 +20,6 @@ public class Evento {
     }
 
     public static Evento capturarDadosEvento(Scanner s) {
-
         System.out.println("\nNome do Evento:");
         String nome = s.nextLine();
 
