@@ -20,7 +20,15 @@ public class App {
         Scanner sc = new Scanner(System.in); // Captura de inteiros
         Scanner scan_eve = new Scanner(System.in); // Captura de eventos
         Scanner scan_part = new Scanner(System.in); // Captura de participantes
+
+        Scanner limpa_Buffer = new Scanner(System.in);
+
         int opcao = -1;
+        int tipo_part_palestrante = 3;  //Define o tipo de participante no cadastro de evento;
+        int tipo_part_instrutor = 4;    //Define o tipo de participante no cadastro de evento;
+
+        boolean moreThanOneExecution_cadastro_participante = false;
+
 
         while (opcao != 0) {
             System.out.println("\nMenu");
@@ -51,10 +59,10 @@ public class App {
                         List<Participante> participantes_evento = new ArrayList<>();
 
                         System.out.print("~Cadastro de Palestrante~");
-                        Participante dadosParticipante = Participante.capturarDadosParticipante(scan_part);
+
+                        Participante dadosParticipante = Participante.capturarDadosParticipante(scan_part, false, tipo_part_palestrante, 0, false);//passado false, pois o participante é um Palestrante apenas;
                         
                         participantes_evento.add(new Participante(dadosParticipante.getNome(), dadosParticipante.getEmail(), dadosParticipante.getTipo()));
-
                         int v_duracao;
 
                         System.out.println("\nDuração do Evento(em Minutos):");
@@ -76,8 +84,9 @@ public class App {
                                 continue;
                             } else if (int_temas == 2) {
                                 System.out.print("Temas cadastrados!\n");
-                            } else if (int_temas < 1 || int_temas > 2) {
+                            } else {
                                 System.out.print("\nOpção inválida\n");
+                                break;
                             }
                         }
                         palestras.add(new Palestra(dadosEvento.getNome(), 
@@ -87,7 +96,6 @@ public class App {
                         participantes_evento, 
                         v_duracao, 
                         temas));
-                        //palestras.add(new Palestra(v_Nome, v_Data, v_Local, v_capacidade_max, v_duracao, temas));
                     
                         System.out.println("Cadastrar mais Palestras? (1)Sim, (2)Não");
                         resposta = sc.nextInt();
@@ -95,8 +103,9 @@ public class App {
                             continue;
                         } else if (resposta == 2) {
                             cadastro = false;
-                        } else if (resposta < 1 || resposta > 2) {
+                        } else {
                             System.out.print("\nOpção inválida\n");
+                            break;
                         }
                     }
                     System.out.println("\n~Finalizado cadastro de Evento~\n");
@@ -123,7 +132,8 @@ public class App {
                             System.out.format("(%d)Cadastro de Instrutor:", contador_ins);
                             List<Participante> participantes_instrutor = new ArrayList<>();
 
-                            Participante dadosParticipante = Participante.capturarDadosParticipante(scan_part);
+                            Participante dadosParticipante = Participante.capturarDadosParticipante(scan_part, false, tipo_part_instrutor, 0, false); //passado false, pois o participante é um instrutor apenas;
+
                             participantes_instrutor.add(new Participante(dadosParticipante.getNome(), 
                             dadosParticipante.getEmail(), 
                             dadosParticipante.getTipo()));
@@ -134,15 +144,16 @@ public class App {
                                 continue;
                             } else if (int_instrutor == 2) {
                                 System.out.print("Instrutores cadastrados!\n");
-                            } else if (int_instrutor < 1 || int_instrutor > 2) {
+                            } else {
                                 System.out.print("\nOpção inválida\n");
+                                break;
                             }
                         }
 
                         int contador_mat = 0;
                         int int_material = -1;
 
-                        while (int_material != 2) {
+                        while (int_material != 2 && cadastro == true) {
                             contador_mat++;
                             String materialString;
                             System.out.format("Material(%d):", contador_mat);
@@ -155,26 +166,30 @@ public class App {
                                 continue;
                             } else if (int_material == 2) {
                                 System.out.print("Materiais cadastrados!\n");
-                            } else if (int_material < 1 || int_material > 2) {
+                            } else {
                                 System.out.print("\nOpção inválida\n");
+                                break;
                             }
                         }
-                        workshops.add(new Workshop(dadosEvento.getNome(), 
-                        dadosEvento.getData(), 
-                        dadosEvento.getLocal(), 
-                        dadosEvento.getCapacidadeMax(), 
-                        instrutores, 
-                        materiais, 
-                        v_cargaHoraria));
 
-                        System.out.println("Cadastrar mais Workshop's? (1)Sim, (2)Não");
-                        resposta = sc.nextInt();
-                        if (resposta == 1) {
-                            continue;
-                        } else if (resposta == 2) {
-                            cadastro = false;
-                        } else if (resposta < 1 || resposta > 2) {
-                            System.out.print("\nOpção inválida\n");
+                        if (cadastro == true){
+                            workshops.add(new Workshop(dadosEvento.getNome(), 
+                            dadosEvento.getData(), 
+                            dadosEvento.getLocal(), 
+                            dadosEvento.getCapacidadeMax(), 
+                            instrutores, 
+                            materiais, 
+                            v_cargaHoraria));
+
+                            System.out.println("Cadastrar mais Workshop's? (1)Sim, (2)Não");
+                            resposta = sc.nextInt();
+                            if (resposta == 1) {
+                                continue;
+                            } else if (resposta == 2) {
+                                cadastro = false;
+                            } else {
+                                System.out.print("\nOpção inválida\n");
+                            }
                         }
                     }
 
@@ -183,11 +198,39 @@ public class App {
                 }
 
             } else if (opcao == 2) {
-                Participante dadosParticipante = Participante.capturarDadosParticipante(scan_part);
-                participantes.add(new Participante(dadosParticipante.getNome(), 
-                dadosParticipante.getEmail(), 
-                dadosParticipante.getTipo()));
-                System.out.println("Participante cadastrado com sucesso!\n");
+                boolean cadastro_part = true;
+                int contador_cadastro = 0;
+
+
+                while (cadastro_part) {
+                    contador_cadastro++;
+                    Participante dadosParticipante = Participante.capturarDadosParticipante(scan_part, true, 0, contador_cadastro, moreThanOneExecution_cadastro_participante); //informando 0 pois o cadatro pode ser qualquer tipo(Normal/VIP/Palestrante/Insrutor);
+
+                    boolean tipo_part = validaTipo(dadosParticipante.getTipo());
+
+                    if (tipo_part == true) {//Validação do TIPO PARTICIPANTE se está dentro das opções sugeridas
+                        break;
+                    }
+
+                    participantes.add(new Participante(dadosParticipante.getNome(), 
+                    dadosParticipante.getEmail(), 
+                    dadosParticipante.getTipo()));
+
+                    moreThanOneExecution_cadastro_participante = true; //Limpa buffer;
+
+                    System.out.println("Participante cadastrado com sucesso!\n");
+                    
+                    System.out.println("Cadastrar mais Participantes? (1)Sim, (2)Não");
+                    int resposta = sc.nextInt();
+                    if (resposta == 1) {
+                        continue;
+                    } else if (resposta == 2) {
+                        cadastro_part = false;
+                    } else {
+                        System.out.print("\nOpção inválida\n");
+                        break;
+                    }
+                }               
             
             } else if (opcao == 3) {
                     System.out.println("\n~Gerenciamento de Reservas~\n");
@@ -230,6 +273,7 @@ public class App {
         sc.close();
         scan_eve.close();
         scan_part.close();
+        limpa_Buffer.close();
         System.out.println("\n~Finalizado~\n");
     }
 
@@ -299,8 +343,17 @@ public class App {
     private static void listarParticipantes(List<Participante> participantes) {
         System.out.println("\n~Lista de Participantes~");
         for (Participante participante : participantes) {
-            String tipo = participante.getTipo() == 1 ? "Normal" : "VIP";
-            System.out.printf("Nome: %s, Email: %s, Tipo: %s\n", participante.getNome(), participante.getEmail(), tipo);
+            int tipo = participante.getTipo();// == 1 ? "Normal" : "VIP";
+            String tipo_str;
+
+            switch (tipo) {
+                case 1 -> tipo_str = "Normal";
+                case 2 -> tipo_str = "VIP";
+                case 3 -> tipo_str = "Palestrante";
+                case 4 -> tipo_str = "Instrutor";
+                default -> tipo_str = "";
+            }
+            System.out.printf("Nome: %s, Email: %s, Tipo: %s\n", participante.getNome(), participante.getEmail(), tipo_str);
         }
 
         System.out.println("\n~Lista de Participantes VIP~");
@@ -390,6 +443,15 @@ private static void listarReservas() {
     System.out.println("\n~Reservas Atuais~");
     for (Reserva reserva : reservas) {
         System.out.printf("Participante: %s, Evento: %s\n", reserva.getParticipante().getNome(), reserva.getEvento().getNome());
+    }
+}
+
+public static Boolean validaTipo(int tipo){
+    if (tipo > 4 || tipo < 1) {
+        return true;
+    }
+    else {
+        return false;
     }
 }
 
