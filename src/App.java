@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 import Class.Evento;
 import Class.Palestra;
@@ -200,37 +201,36 @@ public class App {
             } else if (opcao == 2) {
                 boolean cadastro_part = true;
                 int contador_cadastro = 0;
-
-
+            
                 while (cadastro_part) {
                     contador_cadastro++;
-                    Participante dadosParticipante = Participante.capturarDadosParticipante(scan_part, true, 0, contador_cadastro, moreThanOneExecution_cadastro_participante); //informando 0 pois o cadatro pode ser qualquer tipo(Normal/VIP/Palestrante/Insrutor);
-
+                    Participante dadosParticipante = Participante.capturarDadosParticipante(scan_part, true, 0, contador_cadastro, moreThanOneExecution_cadastro_participante); //informando 0 pois o cadastro pode ser qualquer tipo(Normal/VIP/Palestrante/Instrutor);
+            
                     boolean tipo_part = validaTipo(dadosParticipante.getTipo());
-
-                    if (tipo_part == true) {//Validação do TIPO PARTICIPANTE se está dentro das opções sugeridas
-                        break;
-                    }
-
-                    participantes.add(new Participante(dadosParticipante.getNome(), 
-                    dadosParticipante.getEmail(), 
-                    dadosParticipante.getTipo()));
-
-                    moreThanOneExecution_cadastro_participante = true; //Limpa buffer;
-
-                    System.out.println("Participante cadastrado com sucesso!\n");
-                    
-                    System.out.println("Cadastrar mais Participantes? (1)Sim, (2)Não");
-                    int resposta = sc.nextInt();
-                    if (resposta == 1) {
-                        continue;
-                    } else if (resposta == 2) {
-                        cadastro_part = false;
+            
+                    if (tipo_part) { // Validação do TIPO PARTICIPANTE se está dentro das opções sugeridas
+                        participantes.add(new Participante(dadosParticipante.getNome(), 
+                        dadosParticipante.getEmail(), 
+                        dadosParticipante.getTipo()));
+            
+                        moreThanOneExecution_cadastro_participante = true; // Limpa buffer;
+            
+                        System.out.println("Participante cadastrado com sucesso!\n");
+                        
+                        System.out.println("Cadastrar mais Participantes? (1)Sim, (2)Não");
+                        int resposta = sc.nextInt();
+                        if (resposta == 1) {
+                            continue;
+                        } else if (resposta == 2) {
+                            cadastro_part = false;
+                        } else {
+                            System.out.print("\nOpção inválida\n");
+                            break;
+                        }
                     } else {
-                        System.out.print("\nOpção inválida\n");
-                        break;
+                        System.out.println("Tipo de participante inválido! Tente novamente.");
                     }
-                }               
+                }
             
             } else if (opcao == 3) {
                     System.out.println("\n~Gerenciamento de Reservas~\n");
@@ -281,63 +281,106 @@ public class App {
 
     private static void gerarRelatorioEventos() {
         System.out.println("\n~Relatório de Eventos~");
-
+    
         // Relatório de Palestras
         System.out.println("Palestras:");
         for (Palestra palestra : palestras) {
             System.out.printf("Evento: %s, Data: %s, Local: %s, Capacidade Máxima: %d\n",
                     palestra.getNome(), palestra.getData(), palestra.getLocal(), palestra.getCapacidadeMax());
-            System.out.printf("Total de Participantes: %d\n\n", palestra.getParticipantes().size());
+            
+            int totalParticipantes = contarParticipantesPorEvento(palestra); 
+            System.out.printf("Total de Participantes: %d\n\n", totalParticipantes);
         }
-
-        // Relatório de Workshops (se necessário incluir participantes nos workshops)
+    
+        // Relatório de Workshops
         System.out.println("Workshops:");
         for (Workshop workshop : workshops) {
             System.out.printf("Evento: %s, Data: %s, Local: %s, Capacidade Máxima: %d\n",
                     workshop.getNome(), workshop.getData(), workshop.getLocal(), workshop.getCapacidadeMax());
-            System.out.println("Participantes: (implementação necessária para vincular participantes a workshops)\n");
+            
+            int totalParticipantes = contarParticipantesPorEvento(workshop); 
+            System.out.printf("Total de Participantes: %d\n\n", totalParticipantes);
         }
     }
+    
+    
 
     private static void gerarRelatorioParticipantesPorEvento(Scanner sc) {
         System.out.println("\nSelecione o tipo de evento:");
         System.out.println("1 - Palestra");
         System.out.println("2 - Workshop");
         int tipoEvento = sc.nextInt();
-
+    
         if (tipoEvento == 1) { // Relatório de Palestra
-            System.out.println("\nSelecione a Palestra:");
-            for (int i = 0; i < palestras.size(); i++) {
-                System.out.printf("%d - %s\n", i + 1, palestras.get(i).getNome());
-            }
-            int index = sc.nextInt() - 1;
-
-            if (index >= 0 && index < palestras.size()) {
-                Palestra palestraSelecionada = palestras.get(index);
-                System.out.printf("\nPalestra Selecionada: %s\n", palestraSelecionada.getNome());
-                listarParticipantes(palestraSelecionada.getParticipantes());
+            if (palestras.isEmpty()) {
+                System.out.println("Sem palestras cadastradas para emissão de relatório.");
             } else {
-                System.out.println("Opção inválida!");
+                System.out.println("\nSelecione a Palestra:");
+                for (int i = 0; i < palestras.size(); i++) {
+                    System.out.printf("%d - %s\n", i + 1, palestras.get(i).getNome());
+                }
+                int index = sc.nextInt() - 1;
+    
+                if (index >= 0 && index < palestras.size()) {
+                    Palestra palestraSelecionada = palestras.get(index);
+                    System.out.printf("\nPalestra Selecionada: %s\n", palestraSelecionada.getNome());
+    
+                    // Criar uma nova lista para todos os participantes
+                    List<Participante> todosParticipantes = new ArrayList<>(palestraSelecionada.getParticipantes());
+    
+                    // Adicionar participantes que têm reservas para a palestra
+                    for (Reserva reserva : reservas) {
+                        if (reserva.getEvento().equals(palestraSelecionada)) {
+                            todosParticipantes.add(reserva.getParticipante());
+                        }
+                    }
+    
+                    // Remover duplicatas da lista (se o mesmo participante estiver registrado de ambas as maneiras)
+                    todosParticipantes = todosParticipantes.stream().distinct().collect(Collectors.toList());
+    
+                    listarParticipantes(todosParticipantes);
+                } else {
+                    System.out.println("Opção inválida!");
+                }
             }
         } else if (tipoEvento == 2) { // Relatório de Workshop
-            System.out.println("\nSelecione o Workshop:");
-            for (int i = 0; i < workshops.size(); i++) {
-                System.out.printf("%d - %s\n", i + 1, workshops.get(i).getNome());
-            }
-            int index = sc.nextInt() - 1;
-
-            if (index >= 0 && index < workshops.size()) {
-                Workshop workshopSelecionado = workshops.get(index);
-                System.out.printf("\nWorkshop Selecionado: %s\n", workshopSelecionado.getNome());
-                // Aqui podemos adicionar a lógica para listar participantes, quando implementado.
-                System.out.println("Participantes: (implementação necessária)\n");
+            if (workshops.isEmpty()) {
+                System.out.println("Sem workshops cadastrados para emissão de relatório.");
             } else {
-                System.out.println("Opção inválida!");
+                System.out.println("\nSelecione o Workshop:");
+                for (int i = 0; i < workshops.size(); i++) {
+                    System.out.printf("%d - %s\n", i + 1, workshops.get(i).getNome());
+                }
+                int index = sc.nextInt() - 1;
+    
+                if (index >= 0 && index < workshops.size()) {
+                    Workshop workshopSelecionado = workshops.get(index);
+                    System.out.printf("\nWorkshop Selecionado: %s\n", workshopSelecionado.getNome());
+    
+                    // Criar uma nova lista para todos os participantes
+                    List<Participante> todosParticipantes = new ArrayList<>(workshopSelecionado.getParticipantes());
+    
+                    // Adicionar participantes que têm reservas para o workshop
+                    for (Reserva reserva : reservas) {
+                        if (reserva.getEvento().equals(workshopSelecionado)) {
+                            todosParticipantes.add(reserva.getParticipante());
+                        }
+                    }
+    
+                    // Remover duplicatas da lista
+                    todosParticipantes = todosParticipantes.stream().distinct().collect(Collectors.toList());
+    
+                    listarParticipantes(todosParticipantes);
+                } else {
+                    System.out.println("Opção inválida!");
+                }
             }
         } else {
             System.out.println("Tipo de evento inválido!");
         }
     }
+    
+        
 
     // Método auxiliar para listar participantes, separando VIPs
     private static void listarParticipantes(List<Participante> participantes) {
@@ -364,32 +407,44 @@ public class App {
         }
     }
 
-    private static int contarParticipantesPorEvento(Palestra palestra) {
+    private static int contarParticipantesPorEvento(Evento evento) {
         int contador = 0;
         for (Reserva reserva : reservas) {
-            if (reserva.getEvento().equals(palestra)) {
+            if (reserva.getEvento().equals(evento)) {
                 contador++;
             }
         }
         return contador;
-    }    
+    }       
 
     private static void adicionarReserva(Scanner sc) {
         // Listar os eventos disponíveis
         System.out.println("Selecione um evento para reservar:");
         for (int i = 0; i < palestras.size(); i++) {
             Palestra palestra = palestras.get(i);
-            System.out.printf("%d - %s (Capacidade Máxima: %d)\n", i + 1, palestra.getNome(), palestra.getCapacidadeMax());
+            System.out.printf("%d - Palestra: %s (Capacidade Máxima: %d)\n", i + 1, palestra.getNome(), palestra.getCapacidadeMax());
+        }
+    
+        for (int i = 0; i < workshops.size(); i++) {
+            Workshop workshop = workshops.get(i);
+            System.out.printf("%d - Workshop: %s (Capacidade Máxima: %d)\n", i + 1 + palestras.size(), workshop.getNome(), workshop.getCapacidadeMax());
         }
     
         int eventoEscolhido = sc.nextInt() - 1;
-        if (eventoEscolhido < 0 || eventoEscolhido >= palestras.size()) {
+        Evento evento;
+    
+        if (eventoEscolhido < 0 || eventoEscolhido < palestras.size()) {
+            evento = palestras.get(eventoEscolhido);
+        } else if (eventoEscolhido < palestras.size() + workshops.size()) {
+            evento = workshops.get(eventoEscolhido - palestras.size());
+        } else {
             System.out.println("Evento inválido!");
             return;
         }
     
-        Evento evento = palestras.get(eventoEscolhido);
-        if (contarParticipantesPorEvento((Palestra) evento) >= evento.getCapacidadeMax()) {
+        // Verificar capacidade máxima
+        int totalParticipantes = contarParticipantesPorEvento(evento); // Alterado para usar o método correto
+        if (totalParticipantes >= evento.getCapacidadeMax()) {
             System.out.println("Não é possível adicionar reserva. Capacidade máxima atingida.");
             return;
         }
@@ -403,8 +458,18 @@ public class App {
         System.out.println("Selecione um participante cadastrado:");
         for (int i = 0; i < participantes.size(); i++) {
             Participante participante = participantes.get(i);
+            String tipo_str;
+    
+            switch (participante.getTipo()) {
+                case 1 -> tipo_str = "Normal";
+                case 2 -> tipo_str = "VIP";
+                case 3 -> tipo_str = "Palestrante";
+                case 4 -> tipo_str = "Instrutor";
+                default -> tipo_str = "Desconhecido";
+            }
+    
             System.out.printf("%d - Nome: %s, Email: %s, Tipo: %s\n",
-                    i + 1, participante.getNome(), participante.getEmail(), participante.getTipo() == 1 ? "Normal" : "VIP");
+                    i + 1, participante.getNome(), participante.getEmail(), tipo_str);
         }
     
         int participanteEscolhido = sc.nextInt() - 1;
@@ -419,41 +484,33 @@ public class App {
         System.out.println("Reserva adicionada com sucesso!");
     }
     
+    private static void cancelarReserva(Scanner sc) {
+        System.out.println("Lista de Reservas:");
+        for (int i = 0; i < reservas.size(); i++) {
+            Reserva reserva = reservas.get(i);
+            System.out.printf("%d - Participante: %s, Evento: %s\n", i + 1, reserva.getParticipante().getNome(), reserva.getEvento().getNome());
+        }
     
-
-private static void cancelarReserva(Scanner sc) {
-    System.out.println("Lista de Reservas:");
-    for (int i = 0; i < reservas.size(); i++) {
-        Reserva reserva = reservas.get(i);
-        System.out.printf("%d - Participante: %s, Evento: %s\n", i + 1, reserva.getParticipante().getNome(), reserva.getEvento().getNome());
+        System.out.print("Digite o número da reserva a ser cancelada: ");
+        int reservaEscolhida = sc.nextInt() - 1;
+        if (reservaEscolhida < 0 || reservaEscolhida >= reservas.size()) {
+            System.out.println("Reserva inválida!");
+            return;
+        }
+    
+        reservas.remove(reservaEscolhida);
+        System.out.println("Reserva cancelada com sucesso!");
     }
-
-    System.out.print("Digite o número da reserva a ser cancelada: ");
-    int reservaEscolhida = sc.nextInt() - 1;
-    if (reservaEscolhida < 0 || reservaEscolhida >= reservas.size()) {
-        System.out.println("Reserva inválida!");
-        return;
+    
+    private static void listarReservas() {
+        System.out.println("\n~Reservas Atuais~");
+        for (Reserva reserva : reservas) {
+            System.out.printf("Participante: %s, Evento: %s\n", reserva.getParticipante().getNome(), reserva.getEvento().getNome());
+        }
     }
-
-    reservas.remove(reservaEscolhida);
-    System.out.println("Reserva cancelada com sucesso!");
-}
-
-private static void listarReservas() {
-    System.out.println("\n~Reservas Atuais~");
-    for (Reserva reserva : reservas) {
-        System.out.printf("Participante: %s, Evento: %s\n", reserva.getParticipante().getNome(), reserva.getEvento().getNome());
-    }
-}
-
-public static Boolean validaTipo(int tipo){
-    if (tipo > 4 || tipo < 1) {
-        return true;
-    }
-    else {
-        return false;
-    }
-}
-
+    
+    public static Boolean validaTipo(int tipo) {
+        return tipo >= 1 && tipo <= 4; // Retorna true se for um tipo válido
+    }    
 }
 

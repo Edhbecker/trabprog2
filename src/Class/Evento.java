@@ -8,15 +8,17 @@ public class Evento {
     private String nome;
     private String data;
     private String local;
-    private int capacidade_max;
-    protected List<Participante> participantes;
+    private int capacidadeMax;
+    protected List<Participante> participantes; // Lista de participantes diretos
+    protected List<Reserva> reservas; // Lista para armazenar reservas
 
-    public Evento(String nome, String data, String local, int capacidade_max) {
+    public Evento(String nome, String data, String local, int capacidadeMax) {
         this.nome = nome;
         this.data = data;
         this.local = local;
-        this.capacidade_max = capacidade_max;
+        this.capacidadeMax = capacidadeMax;
         this.participantes = new ArrayList<>();
+        this.reservas = new ArrayList<>(); // Inicializa a lista de reservas
     }
 
     public static Evento capturarDadosEvento(Scanner s) {
@@ -31,6 +33,7 @@ public class Evento {
 
         System.out.println("\nCapacidade máxima:");
         int capacidadeMax = s.nextInt();
+        s.nextLine(); // Limpar o buffer após ler um número
 
         return new Evento(nome, data, local, capacidadeMax);
     }
@@ -48,7 +51,7 @@ public class Evento {
     }
 
     public int getCapacidadeMax() {
-        return capacidade_max;
+        return capacidadeMax;
     }
 
     public List<Participante> getParticipantes() {
@@ -60,10 +63,31 @@ public class Evento {
     }
 
     public void adicionarParticipante(Participante participante) {
-        if (participantes.size() < capacidade_max) {
+        if (participantes.size() < capacidadeMax) {
             participantes.add(participante);
         } else {
             System.out.println("Capacidade máxima atingida para o evento: " + nome);
         }
+    }
+
+    // Método para adicionar uma reserva
+    public void adicionarReserva(Reserva reserva) {
+        reservas.add(reserva);
+    }
+
+    // Método para obter todos os participantes (diretos e por reservas)
+    public List<Participante> getTodosParticipantes() {
+        List<Participante> todosParticipantes = new ArrayList<>(participantes);
+        for (Reserva reserva : reservas) {
+            if (!todosParticipantes.contains(reserva.getParticipante())) { // Evita duplicatas
+                todosParticipantes.add(reserva.getParticipante());
+            }
+        }
+        return todosParticipantes;
+    }
+
+    // Método para obter o total de participantes (diretos e por reservas)
+    public int getTotalParticipantes() {
+        return getTodosParticipantes().size();
     }
 }

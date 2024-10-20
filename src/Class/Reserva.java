@@ -16,4 +16,12 @@ public class Reserva {
     public Evento getEvento() {
         return evento;
     }
+
+    @Override
+    public String toString() {
+        return "Reserva{" +
+                "participante=" + participante.getNome() +
+                ", evento=" + evento.getNome() +
+                '}';
+    }
 }
